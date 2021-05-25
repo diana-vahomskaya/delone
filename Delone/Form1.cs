@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,17 +11,19 @@ using System.Windows.Forms;
 
 namespace Delone
 {
+   
     public partial class Form1 : Form
     {
         #region переменные
         Random rand;
         Graphics g;
         Image img;
-        int N_point, timer_index, level_count = 8;
+        int N_point, timer_index, level_count = 25;
         bool solved;
         double r1, r2, l;
         double delta;
         double UpGU = 9, DownGU = -9;
+
 
         List<triangle> triangles = new List<triangle>();
         List<DPoint> points = new List<DPoint>();
@@ -36,6 +39,10 @@ namespace Delone
         List<List<double>> A = new List<List<double>>();
         List<double> B = new List<double>();
         List<double> C = new List<double>();
+
+        List<List<Point>> Isolines = new List<List<Point>>();
+
+
         #endregion
 
         public Form1()
@@ -74,6 +81,8 @@ namespace Delone
             public double y;
             public double fi;
 
+            public bool Bored;
+
             public static bool operator ==(DPoint p1, DPoint p2)
             {
                 if (p1.x == p2.x && p1.y == p2.y)
@@ -101,6 +110,7 @@ namespace Delone
             public double A;
             public double B;
             public double C;
+            public double fii;
 
             public double get_smth()
             {
@@ -148,7 +158,7 @@ namespace Delone
         void draw_points(Graphics g, List<DPoint> p, int count, Brush brush) //отрисовка точек
         {
             //рисуем точки прямоугольничками (кисть, ось х, ось у, ширина прямоугольнка, высота прямоугольника)
-            for (int i = 0; i < count; i++) g.FillRectangle(brush, (int)p[i].x - 1, (int)p[i].y - 1, 3, 3);
+            for (int i = 0; i < count; i++) g.FillRectangle(brush, (int)p[i].x - 1, (int)p[i].y - 1, 4, 4);
         }
 
         /// <summary>
@@ -198,7 +208,7 @@ namespace Delone
         void draw_points(Graphics g, DPoint[] p, int count, Brush brush)
         {
             for (int i = 0; i < count; i++)
-                g.FillRectangle(brush, (int)p[i].x - 1, (int)p[i].y - 1, 3, 3);
+                g.FillRectangle(brush, (int)p[i].x - 1, (int)p[i].y - 1, 4, 4);
         }
 
         /// <summary>
@@ -228,7 +238,7 @@ namespace Delone
                 {
                     if (module(triangles[j].c, temp_points[timer_index]) < triangles[j].R)
                     {
-                        draw_triangle(g, triangles[j], Color.White);
+                        draw_triangle(g, triangles[j], Color.Black);
                         erased_index.Add(j);
 
                         bool flag = true;
@@ -296,7 +306,7 @@ namespace Delone
                                         erased_points.ToArray(), erased_points.Count);
                                 }
                             }
-                draw_points(g, erased_points.ToArray(), erased_points.Count, Brushes.Maroon);
+                draw_points(g, erased_points.ToArray(), erased_points.Count, Brushes.Green);
 
                 erased_points.Clear();
             }
@@ -310,7 +320,7 @@ namespace Delone
                     {
                         if (equal(triangles[j].p1, angel_points[l]) || equal(triangles[j].p2, angel_points[l]) || equal(triangles[j].p3, angel_points[l]))
                         {
-                            draw_triangle(g, triangles[j], Color.White);
+                            draw_triangle(g, triangles[j], Color.Black);
                             erased_index.Add(j);
 
                             bool flag = true;
@@ -358,7 +368,7 @@ namespace Delone
                             erased_index[j]--;
                     }
 
-                    draw_points(g, erased_points.ToArray(), erased_points.Count, Brushes.Maroon);
+                    draw_points(g, erased_points.ToArray(), erased_points.Count, Brushes.DeepPink);
                     erased_index.Clear();
                     erased_points.Clear();
                 }
@@ -370,7 +380,7 @@ namespace Delone
                     {
                         if (equal(triangles[j].p1, vnutrennie[q]) || equal(triangles[j].p2, vnutrennie[q]) || equal(triangles[j].p3, vnutrennie[q]))
                         {
-                            draw_triangle(g, triangles[j], Color.White);
+                            draw_triangle(g, triangles[j], Color.Black);
                             erased_index.Add(j);
 
                             bool flag = true;
@@ -418,7 +428,7 @@ namespace Delone
                             erased_index[j]--;
                     }
 
-                    draw_points(g, erased_points.ToArray(), erased_points.Count, Brushes.Maroon);
+                    draw_points(g, erased_points.ToArray(), erased_points.Count, Brushes.Black);
                     erased_index.Clear();
                     erased_points.Clear();
                 }
@@ -427,10 +437,10 @@ namespace Delone
                 g = Graphics.FromImage(pictureBox1.Image);
                 timer1.Stop();
                 for (int i = 0; i < triangles.Count; i++)
-                    draw_triangle(g, triangles[i], Color.Navy);
-                draw_points(g, points, points.Count, Brushes.Red);
-                draw_points(g, temp_points, temp_points.Count, Brushes.Red);
-                draw_points(g, vnutrennie, vnutrennie.Count, Brushes.White);
+                    draw_triangle(g, triangles[i], Color.FromArgb(62, 36, 38));
+                draw_points(g, points, points.Count, Brushes.Green);
+                draw_points(g, temp_points, temp_points.Count, Brushes.LightGreen);
+                draw_points(g, vnutrennie, vnutrennie.Count, Brushes.Black);
             }
             timer_index++;
         }
@@ -439,11 +449,11 @@ namespace Delone
         {
             pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             g = Graphics.FromImage(pictureBox1.Image);
-            g.Clear(Color.White);
+            g.Clear(Color.Black);
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
             for (int i = 0; i < triangles.Count; i++)
-                draw_triangle(g, triangles[i], Color.DarkBlue);
+                draw_triangle(g, triangles[i], Color.Lime);
 
         }
 
@@ -513,7 +523,7 @@ namespace Delone
 
             pictureBox1.Image = new Bitmap(width, height);
             g = Graphics.FromImage(pictureBox1.Image);
-            g.Clear(Color.White);
+            g.Clear(Color.Black);
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
             DPoint temp = new DPoint();
@@ -737,15 +747,16 @@ namespace Delone
 
             // Отрисовка
             {
-                draw_points(g, temp_points, temp_points.Count, Brushes.Red);
+                draw_points(g, temp_points, temp_points.Count, Brushes.LightPink);
                 draw_points(g, points, points.Count, Brushes.Navy);
                 draw_points(g, vnutrennie, vnutrennie.Count, Brushes.Violet);
                 img = pictureBox1.Image;
             }
 
-            for (int i = 0; i < level_count; i++)
+            double isostep = (UpGU - DownGU) / level_count;
+            for (int i = 0; i < level_count + 1; i++)
             {
-                levels.Add(DownGU + (UpGU - DownGU) / (level_count - 1) * i);
+                levels.Add(DownGU + isostep *i);
             }
         }
         void get_triangle(Graphics g, DPoint a, DPoint b, DPoint c, DPoint[] arr, int size)
@@ -787,7 +798,7 @@ namespace Delone
                 {
                     var temp = create_triangle(a, b, c, O, R);
                     triangles.Add(temp);
-                    draw_triangle(g, temp, Color.Navy);
+                    draw_triangle(g, temp, Color.FromArgb(62, 36, 38));
                     // draw_ellipse(g, (float)R, O, vertexPen);
                 }
             }
@@ -797,7 +808,7 @@ namespace Delone
         {
             pictureBox1.Image = img;
             g = Graphics.FromImage(pictureBox1.Image);
-            g.Clear(Color.White);
+            g.Clear(Color.Black);
 
             for (int i = 0; i < points.Count - 2; i++)
                 for (int j = 0; j < points.Count - 1; j++)
@@ -806,7 +817,7 @@ namespace Delone
                         if (i == j || j == k || k == i) continue;
                         get_triangle(g, points[i], points[j], points[k], points.ToArray(), points.Count);
                     }
-            draw_points(g, points, points.Count, Brushes.Red);
+            draw_points(g, points, points.Count, Brushes.Green);
         }
        
         void draw_potencial(Graphics g, List<DPoint> arr)
@@ -848,13 +859,13 @@ namespace Delone
                 {
                     clr = Color.FromArgb((int)(buf_mas[i].fi * 255), 0, 0);
                     brh = new System.Drawing.SolidBrush(clr);
-                    g.FillRectangle(brh, (int)arr[i].x - 1, (int)arr[i].y - 1, 3, 3);
+                    g.FillRectangle(brh, (int)arr[i].x - 1, (int)arr[i].y - 1, 4, 4);
                 }
                 if (buf_mas[i].fi <= 0)
                 {
                     clr = Color.FromArgb(0, 0, (int)(Math.Abs(buf_mas[i].fi) * 255));
                     brh = new System.Drawing.SolidBrush(clr);
-                    g.FillRectangle(brh, (int)arr[i].x - 1, (int)arr[i].y - 1, 3, 3);
+                    g.FillRectangle(brh, (int)arr[i].x - 1, (int)arr[i].y - 1, 4, 4);
                 }
             }
         }
@@ -867,71 +878,71 @@ namespace Delone
 
         void draw_iso_lines(Graphics g, List<DPoint> arr)
         {
-            Pen pen0 = new Pen(Color.Yellow);
-            Point pt1 = new Point();
-            Point pt2 = new Point();
+            Pen pen0 = new Pen(Brushes.Yellow);
+            pen0.Width = 2;
+            //List<triangle> tempTringles = new List<triangle>();
 
-            //DPoint[] lines = new DPoint[level_count];
-            DPoint start = new DPoint();
-            DPoint end = new DPoint();
-            DPoint buf = new DPoint();
-
-            for (int idx = 0; idx < level_count; idx++)
+            for (int i = 0; i < level_count + 1; i++)
             {
-                int treug_idx = 0;
-                start = cilinders[idx * cilinders.Count / (level_count)];
-                double pot = start.fi;
+                var isol = new List<Point>();
 
-                for (int i = 0; i < triangles.Count; i++)
+                foreach (triangle triag in triangles)
                 {
-                    if (start == triangles[i].p1 || start == triangles[i].p2 || start == triangles[i].p3)
+                    arr = new List<DPoint>();
+                    arr.Add(triag.p1); arr.Add(triag.p2); arr.Add(triag.p3);
+                   
+                    BubleSort(arr);
+
+                    if ((levels[i] > arr[0].fi) && (levels[i] < arr[2].fi))
                     {
-                        treug_idx = i;
-                        start = triangles[i].c;
-                        start.fi = pot;
-                        break;
+                        if (levels[i] > arr[1].fi)
+                            isol.Add(SMTH(levels[i], arr[1], arr[2]));
+                        else isol.Add(SMTH(levels[i], arr[0], arr[1]));
+
+                        isol.Add(SMTH(levels[i], arr[0], arr[2]));
                     }
                 }
-
-                bool exit = true;
-                do
-                {
-                    var tr = triangles[treug_idx];
-                    tr.get_abc();
-                    triangles[treug_idx].get_abc();
-                    end.x = start.x + triangles[treug_idx].A;
-                    end.y = start.y + triangles[treug_idx].B;
-
-                    pt1.X = (int)start.x;
-                    pt1.Y = (int)start.y;
-                    pt2.X = (int)end.x;
-                    pt2.Y = (int)end.y;
-                    g.DrawLine(pen0, pt1, pt2);
-
-                    start = end;
-                    exit = next_step(end, treug_idx, 10);
-                } while (exit);
+                Isolines.Add(isol);
+              //  g.DrawLines(pen0, Isolines[i].ToArray());
+               for (int j = 0; j < isol.Count/2; j++)
+                  g.DrawLine(pen0, isol[2*j], isol[2*j+1]);
             }
         }
-        bool next_step(DPoint end, int i, double eps)
+
+        void BubleSort(List<DPoint> arr)
         {
-            bool to_return = false;
-            triangle tr1 = new triangle();
-            triangle tr2 = new triangle();
-            triangle tr3 = new triangle();
-            tr1.create(end, triangles[i].p2, triangles[i].p3);
-            tr2.create(end, triangles[i].p3, triangles[i].p1);
-            tr3.create(end, triangles[i].p1, triangles[i].p2);
-            if (Math.Abs(tr1.get_smth() + tr2.get_smth() + tr3.get_smth() - triangles[i].get_smth()) < eps)
+            DPoint temp ; // временная переменная для обмена элементов местами
+                        // Сортировка массива пузырьком
+            for (int i = 0; i < arr.Count() - 1; i++)
             {
-                to_return = true;
+                for (int j = 0; j < arr.Count() - i - 1; j++)
+                {
+                    if (arr[j].fi > arr[j + 1].fi)
+                    {
+                        // меняем элементы местами
+                        temp = arr[j];
+                        arr[j] = arr[j + 1];
+                        arr[j + 1] = temp;
+                    }
+                }
             }
-            return to_return;
         }
 
-        void draw_power_lines()
+        private static Func<double, DPoint, DPoint, Point> SMTH = (ISO, XY1, XY2) =>
         {
+            if (double.IsPositiveInfinity(XY1.fi)) return new Point((int)XY1.x, (int)XY1.y);
+            if (double.IsPositiveInfinity(XY2.fi)) return new Point((int)XY2.x, (int)XY2.y);
+            double smth = (XY2.fi - ISO) / (XY2.fi - XY1.fi);
+            double x = (int)XY2.x - ((int)XY2.x - (int)XY1.x) * smth;
+            double y = (int)XY2.y - ((int)XY2.y - (int)XY1.y) * smth;
+            return new Point((int)x, (int)y);
+        };
 
+
+        void draw_power_lines(Graphics g, List<DPoint> arr)
+        {
+ 
+            
         }
 
         public void Galerkin()
@@ -939,6 +950,7 @@ namespace Delone
             CREATE_A();
             CREATE_B();
             C.Clear();
+            
 
             List<double> buf = new List<double>();
             double[] a = new double[A[0].Count * A[0].Count];
@@ -962,19 +974,17 @@ namespace Delone
                 temp.fi = C[i];
                 PotentionalPoints.Add(temp);
             }
+
             knots.Clear();
             knots.AddRange(PotentionalPoints);
 
-            int width = pictureBox1.Width;
-            int height = pictureBox1.Height;
-
-            pictureBox1.Image = new Bitmap(width, height);
+            pictureBox1.Image = img;
             g = Graphics.FromImage(pictureBox1.Image);
-            g.Clear(Color.Black);
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
+          
             all_points.AddRange(knots);
             all_points.AddRange(edge);
+            File.AppendAllLines("C:/Users/Admin/test.txt", all_points.Select(p => "X = " + p.x + "  Y = " + p.y + "  FI = " + p.fi));
+         
 
             if (DRAW_POT.Checked)
             {
@@ -986,7 +996,7 @@ namespace Delone
             }
             if (DRAW_POWER.Checked)
             {
-                draw_power_lines();
+                draw_power_lines(g, all_points);
             }
 
         }
